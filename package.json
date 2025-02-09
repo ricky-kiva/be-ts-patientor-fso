@@ -1,0 +1,15 @@
+{
+  "name": "be-ts-patientor-fso",
+  "version": "1.0.0",
+  "description": "Patientor. A simple medical record application for doctors who handle diagnoses and basic health information of their patients",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "typescript",
+    "express"
+  ],
+  "author": "Rickyslash",
+  "license": "ISC"
+}
