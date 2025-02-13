@@ -1,32 +1,43 @@
-import express, { Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import patientServices from '../services/patientServices';
-import { NewPatient, PatientWithoutSSN } from '../types';
-import toNewPatient from '../utils';
+import { NewPatient, Patient, PatientWithoutSSN } from '../types';
+import { NewPatientSchema } from '../utils';
+import { z } from 'zod';
 
 const patientRouter = express.Router();
+
+const newPatientParser = (req: Request, _res: Response, next: NextFunction) => {
+  try {
+    NewPatientSchema.parse(req.body);
+    next();
+  } catch (e: unknown) {
+    next(e);
+  }
+};
 
 patientRouter.get('/', (_req, res: Response<PatientWithoutSSN[]>) => {
   res.send(patientServices.getPatientsWithoutSSN());
 });
 
-patientRouter.post('/', (req, res) => {
-  let newPatient: NewPatient;
+patientRouter.post('/', newPatientParser, (
+  req: Request<unknown, unknown, NewPatient>,
+  res: Response<Patient>
+) => {
+  const addedPatient = patientServices.addPatient(req.body);
+  res.json(addedPatient);
+});
 
-  try {
-    newPatient = toNewPatient(req.body);
-  } catch(e: unknown) {
-    res.status(400).json({
-      error: e instanceof Error 
-        ? e.message
-        : 'Invalid input'
-    });
-    
+const errorMiddleWare = (e: unknown, _req: Request, res: Response, next: NextFunction) => {
+  if (e instanceof z.ZodError) {
+    res.status(400).send({ error: e.issues });
     return;
   }
 
-  const addedPatient = patientServices.addPatient(newPatient);
+  if (e instanceof Error) res.status(400).send({ error: e.message });
 
-  res.json(addedPatient);
-});
+  next(e);
+};
+
+patientRouter.use(errorMiddleWare);
 
 export default patientRouter;
