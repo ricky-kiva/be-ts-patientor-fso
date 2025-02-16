@@ -27,6 +27,17 @@ patientRouter.post('/', newPatientParser, (
   res.json(addedPatient);
 });
 
+patientRouter.get('/:id', (req, res: Response<Patient>) => {
+  const patient = patientServices.findPatientById(req.params.id);
+
+  if (!patient) {
+    res.sendStatus(404);
+    return;
+  }
+
+  res.send(patient);
+});
+
 const errorMiddleWare = (e: unknown, _req: Request, res: Response, next: NextFunction) => {
   if (e instanceof z.ZodError) {
     res.status(400).send({ error: e.issues });
