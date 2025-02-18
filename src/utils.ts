@@ -53,3 +53,9 @@ export const NewPatientSchema = z.object({
   occupation: z.string(),
   entries: z.array(EntrySchema).default([])
 });
+
+export const NewEntrySchema = z.discriminatedUnion('type', [
+  HospitalEntrySchema.omit({ id: true }),
+  OccupationalHealthcareEntrySchema.omit({ id: true }),
+  HealthCheckEntrySchema.omit({ id: true })
+]);
